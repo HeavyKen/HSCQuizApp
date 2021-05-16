@@ -5,12 +5,12 @@ import { CreateQuizScreen } from "./CreateQuizScreen"
 import { StartQuizScreen } from "./StartQuizScreen"
 import { QuizQuestionsScreen } from "./QuizQuestionsScreen"
 import { QuizResultsScreen } from "./QuizResultsScreen"
-import { FirebaseFirestoreTypes } from "@react-native-firebase/firestore"
+import { Result } from "../types"
 
 export type QuizStackParamList = {
     Home: undefined,
     CreateQuiz: {
-        subjectRef: FirebaseFirestoreTypes.DocumentReference
+        subjectId: string
     },
     StartQuiz: {
         subjectId: string,
@@ -18,13 +18,11 @@ export type QuizStackParamList = {
         examIds: string[]
     },
     QuizQuestions: {
-        subjectId: string,
-        numQuestions: number,
-        examIds: string[]
+        subjectId: string
+        questionIds: [string, string][]
     },
     QuizResults: {
-        questionIds: string[],
-        answers: number[]
+        result: Result
     }
 }
 

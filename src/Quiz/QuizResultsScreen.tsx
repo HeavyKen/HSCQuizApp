@@ -1,4 +1,4 @@
-import { RouteProp } from "@react-navigation/native"
+import { RouteProp, TabRouter } from "@react-navigation/native"
 import { StackNavigationProp } from "@react-navigation/stack"
 import { Button, Card, Text } from "@ui-kitten/components"
 import React from "react"
@@ -7,17 +7,16 @@ import { QuizStackParamList } from "./QuizScreen"
 import { ScreenWrapper } from "../ScreenWrapper"
 
 interface QuizResultsScreenProps {
-    route: RouteProp<QuizStackParamList, "QuizQuestions">,
+    route: RouteProp<QuizStackParamList, "QuizResults">,
     navigation: StackNavigationProp<QuizStackParamList>
 }
 
-export const QuizResultsScreen = ({ navigation }: QuizResultsScreenProps) => {
+export const QuizResultsScreen = ({ route, navigation }: QuizResultsScreenProps) => {
     return <ScreenWrapper titleComponent="Results">
 
         <View style={{ margin: 20, flexDirection: 'row', justifyContent: 'space-evenly' }}>
-            <Text category='h6'> Correct: 10%</Text>
-            <Text category='h6'> Incorrect: 90%</Text>
-            <Text category='h6'> Grade: 1/10</Text>
+            <Text category='h6'> Correct: {route.params.result.percentage}%</Text>
+            <Text category='h6'> Grade: {route.params.result.score}/{route.params.result.numQuestions}</Text>
         </View>
 
         <Card style={{ justifyContent: 'space-evenly', margin: 20 }}>
@@ -27,71 +26,17 @@ export const QuizResultsScreen = ({ navigation }: QuizResultsScreenProps) => {
                 <Text>Correct</Text>
                 <Text>Results</Text>
             </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>1</Text>
-                <Text>A</Text>
-                <Text>A</Text>
-                <Text status='success'>✓</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>2</Text>
-                <Text>B</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>3</Text>
-                <Text>B</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>4</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>5</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>6</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>7</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>8</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>9</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
-                <Text>10</Text>
-                <Text>D</Text>
-                <Text>A</Text>
-                <Text status='danger'>x</Text>
-            </View>
+            {route.params.result.answers.map((a, i) => <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10 }}>
+                <Text>{i + 1}</Text>
+                <Text>{a.user !== undefined && a.user !== null ? String.fromCharCode(65 + a.user) : " "}</Text>
+                <Text>{String.fromCharCode(65 + a.correct)}</Text>
+                <Text status={a.correct === a.user ? "success" : "danger"}>{a.correct === a.user ? "✓" : "x"}</Text>
+            </View>)}
         </Card>
-        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-            <Button appearance='ghost' onPress={() => navigation.navigate("StartQuiz", {subjectId: "maths-adv", numQuestions: 10, examIds: []})}>Retake Quiz</Button>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+            {/* <Button appearance='ghost' onPress={() => navigation.navigate("StartQuiz", {subjectId: "maths-adv", numQuestions: 10, examIds: []})}>Retake Quiz</Button> */}
             <Button appearance='ghost' onPress={() => navigation.navigate("Home")}>Home</Button>
-            <Button appearance='ghost' onPress={() => navigation.navigate("CreateQuiz", {subjectId: "maths-adv"})}>Take a New Quiz</Button>
+            {/* <Button appearance='ghost' onPress={() => navigation.navigate("CreateQuiz", {subjectId: "maths-adv"})}>Take a New Quiz</Button> */}
         </View>
     </ScreenWrapper>
 }

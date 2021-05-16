@@ -3,7 +3,9 @@ import { Icon } from "@ui-kitten/components";
 import React from "react";
 import { QuizScreen } from "./Quiz/QuizScreen";
 import { SettingsScreen } from "./Settings/SettingsScreen";
+import { ResultsScreen } from "./Stats/ResultsScreen";
 import { StatsScreen } from "./Stats/StatsScreen";
+import { SubjectStats } from "./Stats/SubjectStats";
 
 
 export type TabNavigatorParamList = {

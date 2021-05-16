@@ -11,6 +11,8 @@ import { AuthContext } from './authContext';
 import { State } from 'react-native-gesture-handler';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import auth from "@react-native-firebase/auth"
+import firestore from "@react-native-firebase/firestore"
+import { StatusBar } from 'react-native';
 
 const navTheme = {
   ...DefaultTheme,
@@ -39,12 +41,25 @@ export const App = () => {
   const [user, setUser] = React.useState<FirebaseAuthTypes.User | null>(null)
   const navigationRef = React.useRef<NavigationContainerRef>(null)
 
-  auth().onAuthStateChanged(user => {
+  auth().onAuthStateChanged(async user => {
     setUser(user);
-    if (!user) navigationRef.current?.navigate("Login")
+    if (!user) {
+      navigationRef.current?.navigate("Login")
+    } else {
+      const profile = await firestore().collection("users").doc(user.uid).get()
+      if (!profile.exists) {
+        firestore().collection("users").doc(user.uid).set({
+          name: user.email?.split("@")[0],
+          darkMode: false,
+          subjects: []
+        })
+      }
+    }
+
   })
 
   return <NavigationContainer theme={navTheme} ref={navigationRef}>
+    <StatusBar backgroundColor="white" barStyle="dark-content" />
     <IconRegistry icons={EvaIconsPack} />
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <AuthContext.Provider value={user}>

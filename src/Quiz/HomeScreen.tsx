@@ -8,27 +8,27 @@ import { ScreenWrapper } from "../ScreenWrapper"
 import firestore, { firebase, FirebaseFirestoreTypes } from "@react-native-firebase/firestore"
 import { AuthContext } from "../authContext"
 import { SubjectSummary, UserProfile } from "../types"
+import {useDocumentData} from "react-firebase-hooks/firestore"
+import {useTheme} from "@ui-kitten/components"
 
-const PlusIcon = (props: any) => <Icon {...props} name='plus-circle-outline' />
-const MinusIcon = (props: any) => <Icon {...props} name='minus-circle-outline' />
+const PlusIcon = (props: any) => <Icon {...props} name='plus-circle-outline' fill={useTheme()["color-success-600"]}/>
+const MinusIcon = (props: any) => <Icon {...props} name='minus-circle-outline' fill='#FF0000'/>
 const EditIcon = (props: any) => <Icon {...props} name='edit-outline' />
 
 interface HomeScreenProps {
     navigation: StackNavigationProp<QuizStackParamList>
 }
 
+// const docRef = firestore().collection("collectionName").doc("documentId")
+// const [data, loading, error] = useDocumentData(docRef)
+
 export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     const user = React.useContext(AuthContext)
-    const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null)
+    const [userProfile, profileLoading, profileError]: [UserProfile | undefined, boolean, any] = useDocumentData(firestore().collection("users").doc(user?.uid))
     const [subjects, setSubjects] = React.useState<SubjectSummary[] | null>(null)
     const [editing, setEditing] = React.useState<boolean>(false)
 
-    React.useEffect(() => {
-        return firestore().collection("users").doc(user?.uid).onSnapshot(doc => {
-            setUserProfile(doc.data() as unknown as UserProfile)
-        })
-    }, [user])
-
+    // Runs when edit button is pressed.
     const displayAllSubjects = async () => {
         if (subjects) {
             // Subjects already loaded, so remove them instead.
@@ -60,8 +60,11 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     return <ScreenWrapper titleComponent={<>Hello, <Text category="h4">{userProfile?.name}</Text></>}>
 
         <View style={{ margin: 20, flex: 1 }}>
-            {userProfile ? <>
-                <Text category='h5'>Your Subjects</Text>
+            {!profileLoading && userProfile ? <>
+                <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+                    <Text category='h5'>Your Subjects</Text>
+                    <Button appearance='ghost' accessoryLeft={EditIcon} size="large" onPress={displayAllSubjects} />
+                </View>
                 {/* User's Added Subjects */}
                 {userProfile.subjects.map((subject, i) => <ListItem
                     key={i}
@@ -69,7 +72,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
                     accessoryRight={subjects && editing ? MinusIcon : undefined}
                     onPress={() => editing && subjects ? firebase.firestore().collection("users").doc(user?.uid).update({
                         "subjects": firebase.firestore.FieldValue.arrayRemove(subject)
-                    }) : navigation.navigate("CreateQuiz", { subjectRef: subject.reference })}
+                    }) : navigation.navigate("CreateQuiz", { subjectId: subject.reference.id })}
                 />)}
                 {/* Subjects that can be added. Only shows subjects the user isn't already in.
                     Only shows while editing. Shows Spinner if editing, but subjects haven't loaded/been set. */}
@@ -81,8 +84,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
                         "subjects": firebase.firestore.FieldValue.arrayUnion(subject)
                     })}
                 />) : <Spinner size='giant' style={{}} />)}
-                <Button style={{ marginTop: 10 }} appearance='ghost' accessoryLeft={EditIcon} size="large" onPress={displayAllSubjects} />
-
             </> : <Spinner size='giant' style={{}} />}
         </View>
 

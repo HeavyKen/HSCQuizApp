@@ -63,10 +63,10 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
             </TabBar>
             {error && <Text>{error}</Text>}
             <Input placeholder='Email Address' value={email} onChangeText={setEmail} style={{ borderColor: "rgba(0, 0, 0, 0.3)", marginTop: 30 }} />
-            <Input placeholder='Password' value={password} onChangeText={setPassword} style={{ borderColor: "rgba(0, 0, 0, 0.3)", marginTop: 10 }} />
+            <Input placeholder='Password' secureTextEntry={true} value={password} onChangeText={setPassword} style={{ borderColor: "rgba(0, 0, 0, 0.3)", marginTop: 10 }} />
             {selectedIndex === 0 ? <Text style={{ marginTop: 20 }}>Forgot Password?</Text> : <Text style={{ marginTop: 20 }}></Text>}
             {/* <View style={{flex: 1, flexGrow: 100}}/> */}
-            <Button style={{ marginTop: 60 }} onPress={onPress}>
+            <Button style={{ marginTop: 60 }} onPress={onPress} >
                 {selectedIndex === 0 ? 'Login' : 'Sign Up'}
             </Button>
         </Card>

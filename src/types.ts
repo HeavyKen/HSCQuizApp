@@ -11,6 +11,16 @@ export interface UserProfile {
     darkMode: boolean
 }
 
+export interface Result {
+    score: number
+    numQuestions: number
+    percentage: number
+    answers: {
+        correct: number,
+        user?: number
+    }[]
+}
+
 export interface Subject {
     name: string
 }

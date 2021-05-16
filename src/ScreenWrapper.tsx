@@ -1,5 +1,5 @@
 import React from "react"
-import { ScrollView, View } from "react-native"
+import { SafeAreaView, ScrollView, View } from "react-native"
 import { Header } from "./Header"
 
 interface ScreenWrapperProps {
@@ -8,7 +8,7 @@ interface ScreenWrapperProps {
 }
 
 export const ScreenWrapper: React.FunctionComponent<ScreenWrapperProps> = ({ titleComponent, children, bounces=false }) => {
-    return <View style={{ flex: 1 }}>
+    return <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 2 }}>
             <Header titleComponent={titleComponent} />
         </View>
@@ -17,5 +17,5 @@ export const ScreenWrapper: React.FunctionComponent<ScreenWrapperProps> = ({ tit
                 {children}
             </ScrollView>
         </View>
-    </View>
+    </SafeAreaView>
 }

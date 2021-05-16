@@ -7,6 +7,7 @@ import { QuizStackParamList } from "./QuizScreen"
 import { ScreenWrapper } from "../ScreenWrapper"
 import firestore, { FirebaseFirestoreTypes } from "@react-native-firebase/firestore"
 import { Exam, Subject } from "../types"
+import { useCollection, useCollectionData, useDocumentData } from "react-firebase-hooks/firestore"
 
 interface CreateQuizScreenProps {
     route: RouteProp<QuizStackParamList, "CreateQuiz">,
@@ -20,19 +21,15 @@ interface ExamWithReference {
 
 export const CreateQuizScreen = ({ route, navigation }: CreateQuizScreenProps) => {
     const [selectedIndex, setSelectedIndex] = React.useState<IndexPath>(new IndexPath(0));
-    const [subjectDetails, setSubjectDetails] = React.useState<any>()
-    const [exams, setExams] = React.useState<ExamWithReference[] | null>(null)
-    const [checked, setChecked] = React.useState(Array(7).fill(true));
+    const [checked, setChecked] = React.useState<boolean[]>([]);
+
+    const subjectRef = firestore().collection("subjects").doc(route.params.subjectId)
+    const [subjectDetails, subjectLoading, subjectError] = useDocumentData(subjectRef)
+    const [exams, examsLoading, examsError] = useCollection(subjectRef.collection("exams"))
 
     React.useEffect(() => {
-        route.params.subjectRef.get().then(doc => setSubjectDetails(doc.data() as unknown as Subject))
-        route.params.subjectRef.collection("exams").get().then(snapshot => {
-            setExams(snapshot.docs.map(doc => ({
-                exam: doc.data(),
-                ref: doc.ref
-            })) as unknown as ExamWithReference[])
-        })
-    }, [route.params.subjectRef])
+        setChecked(exams?.docs.map((_: any) => true) || [])
+    }, [exams])
 
     return <ScreenWrapper titleComponent={subjectDetails?.name || "Loading..."}>
         <View style={{ flex: 3, margin: 20, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around' }}>
@@ -60,25 +57,28 @@ export const CreateQuizScreen = ({ route, navigation }: CreateQuizScreenProps) =
                 Select exam year(s)
             </Text>
 
-            {exams?.map(
-                (exam, i) => <CheckBox
+            {exams?.docs.map(
+                (exam: any, i: number) => <CheckBox
                     style={{ marginTop: 10 }}
                     checked={checked[i]}
                     onChange={next => setChecked(prev => {
                         prev[i] = next
-                        console.log(prev)
                         return [...prev]
                     })}
                     key={i}
                 >
-                    {exam.exam.name}
+                    {exam.data().name}
                 </CheckBox>
             ) || <Text>Loading...</Text>}
 
             <Button
                 style={{ marginTop: 20 }}
-                onPress={() => navigation.navigate("StartQuiz", { subjectId: "maths-adv", numQuestions: 10 + selectedIndex!.row * 5, examIds: [] })}
-                disabled={!selectedIndex}
+                onPress={() => navigation.navigate("StartQuiz", {
+                    subjectId: route.params.subjectId,
+                    numQuestions: 10 + selectedIndex!.row * 5,
+                    examIds: exams?.docs.filter((_: any, i: number) => checked[i]).map((e: { id: any }) => e.id) || []
+                })}
+                disabled={!selectedIndex || !exams?.docs.length || !checked.filter(c => c).length}
             >
                 Generate Quiz
             </Button>
